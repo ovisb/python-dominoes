@@ -2,6 +2,9 @@ import random
 
 
 def generate_dominoes() -> list[list[int]]:
+    """
+    Generates 28 distinct pairs of dominoes
+    """
     domino_max_range = 7
     completed = []
     dominoes = []
@@ -37,10 +40,14 @@ def find_highest_domino(dominoes: list[list[int]]) -> list[int]:
     return highest_domino
 
 
-def get_highest_dominoes_indexes(player: list[list[int]], computer: list[list[int]]):
+def get_highest_player_comp(
+    dominoes_list: list[list[int]],
+    user_pieces: list[list[int]],
+    computer_pieces: list[list[int]],
+):
     while True:
-        player_domino = find_highest_domino(player)
-        computer_domino = find_highest_domino(computer)
+        player_domino = find_highest_domino(user_pieces)
+        computer_domino = find_highest_domino(computer_pieces)
 
         if player_domino is None and computer_domino is None:
             print("Shuffling")
@@ -52,18 +59,22 @@ def get_highest_dominoes_indexes(player: list[list[int]], computer: list[list[in
     return player_domino, computer_domino
 
 
-def get_starting_piece(
-    player: list[list[int]], computer: list[list[int]]
-) -> tuple[list, str]:
-    player_domino, computer_domino = get_highest_dominoes_indexes(player, computer)
+def get_initial_starting_piece(
+    dominoes_list: list[list[int]],
+    user_pieces: list[list[int]],
+    computer_pieces: list[list[int]],
+) -> tuple[list[int], str]:
+    player_domino, computer_domino = get_highest_player_comp(
+        dominoes_list, user_pieces, computer_pieces
+    )
 
     if player_domino > computer_domino:
         domino_snake = player_domino
-        player.remove(player_domino)
+        user_pieces.remove(player_domino)
         status = "computer"
     else:
-        computer.remove(computer_domino)
+        computer_pieces.remove(computer_domino)
         domino_snake = computer_domino
         status = "player"
 
-    return [domino_snake], status
+    return domino_snake, status

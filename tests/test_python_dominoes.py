@@ -2,7 +2,7 @@ import random
 
 import pytest
 
-from python_dominoes.python_dominoes import (
+from python_dominoes.dominoes import (
     generate_dominoes,
     shuffle_dominoes,
     split_dominoes,

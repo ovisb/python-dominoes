@@ -23,6 +23,9 @@ def check_winner(pieces: list[list[int]]) -> bool:
 
 
 def game_over() -> bool:
+    if not stock_pieces:
+        print("Status: The game is over. It's a draw!")
+        return True
     if check_winner(player_pieces):
         print(f"Status: The game is over. You won!")
         return True
@@ -48,31 +51,98 @@ def ui():
         print(f"Status: {status}")
 
         if game_player == "player":
-            move = get_input()
+            while True:
+                move = input()
+                if not validate_input(move):
+                    print("Invalid input. Please try again.")
+                    continue
 
-            remove_piece(player_pieces, move)
+                move = int(move)
+
+                if not move_domino(player_pieces, move):
+                    print("Illegal move. Please try again.")
+                    continue
+
+                break
+
             game_player = "computer"
         else:
             input()
-            # all except 0
-            comp_options = list(range(-len(computer_pieces), 0)) + list(
-                range(1, len(computer_pieces))
-            )
-            move = random.choice(comp_options)
-            remove_piece(computer_pieces, move)
+            while True:
+                comp_options = list(
+                    range(-len(computer_pieces), len(computer_pieces) + 1)
+                )
+                move = random.choice(comp_options)
+
+                if move_domino(computer_pieces, move):
+                    break
 
             game_player = "player"
 
 
-def get_input() -> int:
-    while True:
-        move = input()
+def move_domino(pieces: list[list[int]], move: int) -> bool:
+    if move == 0 and stock_pieces:
+        remove_stock_piece(pieces)
+        return True
 
-        if not validate_input(move):
-            print("Invalid input. Please try again.")
-            continue
+    if move < 0:
+        move = abs(move)
+        return move_domino_left(pieces, move)
+    else:
+        return move_domino_right(pieces, move)
 
-        return int(move)
+
+def move_domino_left(pieces: list[list[int]], move: int) -> bool:
+    player_domino_piece = pieces[move - 1]
+    if not validate_neighbour_domino(player_domino_piece, 0):
+        return False
+
+    snake_piece_first_number = snakes[0][0]
+    player_domino_piece_second_number = player_domino_piece[1]
+
+    if not swapped(player_domino_piece_second_number, snake_piece_first_number):
+        swap_domino_number_pair(player_domino_piece)
+
+    snakes.insert(0, player_domino_piece)
+    pieces.remove(player_domino_piece)
+    return True
+
+
+def move_domino_right(pieces: list[list[int]], move: int) -> bool:
+    player_domino_piece = pieces[move - 1]
+    if not validate_neighbour_domino(player_domino_piece, -1):
+        return False
+
+    snake_piece_second_number = snakes[-1][1]
+    player_domino_piece_first_number = player_domino_piece[0]
+
+    if not swapped(player_domino_piece_first_number, snake_piece_second_number):
+        swap_domino_number_pair(player_domino_piece)
+
+    snakes.append(player_domino_piece)
+    pieces.remove(player_domino_piece)
+    return True
+
+
+def swap_domino_number_pair(player_domino_piece: list[int]) -> None:
+    temp = player_domino_piece[0]
+    player_domino_piece[0] = player_domino_piece[1]
+    player_domino_piece[1] = temp
+
+
+def swapped(
+    player_domino_piece_first_number: int, snake_piece_second_number: int
+) -> bool:
+    return player_domino_piece_first_number == snake_piece_second_number
+
+
+def validate_neighbour_domino(snake_piece: list[int], index: int) -> bool:
+    """
+    Validate neighbour domino
+    0 checks first pair on the left and -1 checks last pair on the right
+    """
+    neighbour_snake_pair_number = snakes[index][index]
+    return neighbour_snake_pair_number in snake_piece
 
 
 def validate_input(move: str) -> bool:
@@ -90,26 +160,10 @@ def validate_input(move: str) -> bool:
     return True
 
 
-def remove_piece(pieces: list[list[int]], move: int):
-    if move < 0:
-        move = abs(move)
-        snake = pieces[move - 1]
-        snakes.insert(0, snake)
-    elif move == 0:
-        remove_stock_piece(pieces)
-        return
-    else:
-        snake = pieces[move - 1]
-        snakes.append(snake)
-
-    pieces.remove(snake)
-
-
-def remove_stock_piece(pieces: list[list[int]]):
-    if stock_pieces:
-        random_stock: list[int] = random.choice(stock_pieces)
-        pieces.append(random_stock)
-        stock_pieces.remove(random_stock)
+def remove_stock_piece(pieces: list[list[int]]) -> None:
+    random_stock: list[int] = random.choice(stock_pieces)
+    pieces.append(random_stock)
+    stock_pieces.remove(random_stock)
 
 
 def print_stage() -> None:
@@ -127,7 +181,7 @@ def print_stage() -> None:
     print()
 
 
-def print_snake_pieces():
+def print_snake_pieces() -> None:
     if len(snakes) > 6:
         print_snake_pieces_trim()
         return
@@ -137,7 +191,7 @@ def print_snake_pieces():
     print()
 
 
-def print_snake_pieces_trim():
+def print_snake_pieces_trim() -> None:
     for snake in snakes[:3]:
         print(f"{snake}", end="")
     print("...", end="")

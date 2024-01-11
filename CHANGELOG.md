@@ -12,3 +12,8 @@
 - Added the following game logic:
 - Either player is able to select dominoes and move it, to either the left or right of the snake
 - Currently, game winner will be chosen if either user or computer has no more dominoes left
+
+11 Jan 2024
+- Implemented the following two requirements
+  - A player cannot add a domino to the end of the snake if it doesn't contain the matching number.
+  - The orientation of the newly added domino ensures that the matching numbers are neighbors.

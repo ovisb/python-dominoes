@@ -39,10 +39,7 @@ def game_over() -> bool:
 def ui():
     game_player = initial_status
     while True:
-        if game_player == "player":
-            status = "It's your turn to make a move. Enter your command."
-        else:
-            status = "Computer is about to make a move. Press Enter to continue..."
+        status = set_status(game_player)
 
         print_stage()
         if game_over():
@@ -51,37 +48,48 @@ def ui():
         print(f"Status: {status}")
 
         if game_player == "player":
-            while True:
-                move = input()
-                if not validate_input(move):
-                    print("Invalid input. Please try again.")
-                    continue
-
-                move = int(move)
-
-                if not move_domino(player_pieces, move):
-                    print("Illegal move. Please try again.")
-                    continue
-
-                break
-
+            player_move()
             game_player = "computer"
         else:
             input()
-            while True:
-                comp_options = list(
-                    range(-len(computer_pieces), len(computer_pieces) + 1)
-                )
-                move = random.choice(comp_options)
-
-                if move_domino(computer_pieces, move):
-                    break
-
+            computer_move()
             game_player = "player"
 
 
+def set_status(player: str) -> str:
+    if player == "player":
+        return "It's your turn to make a move. Enter your command."
+
+    return "Computer is about to make a move. Press Enter to continue..."
+
+
+def player_move() -> None:
+    while True:
+        move = input()
+        if not validate_player_input(move):
+            print("Invalid input. Please try again.")
+            continue
+
+        move = int(move)
+
+        if not move_domino(player_pieces, move):
+            print("Illegal move. Please try again.")
+            continue
+
+        break
+
+
+def computer_move() -> None:
+    while True:
+        comp_options = range(-len(computer_pieces), len(computer_pieces) + 1)
+        move = random.choice(comp_options)
+
+        if move_domino(computer_pieces, move):
+            break
+
+
 def move_domino(pieces: list[list[int]], move: int) -> bool:
-    if move == 0 and stock_pieces:
+    if move == 0:
         remove_stock_piece(pieces)
         return True
 
@@ -92,24 +100,28 @@ def move_domino(pieces: list[list[int]], move: int) -> bool:
         return move_domino_right(pieces, move)
 
 
+def get_domino_piece(pieces: list[list[int]], move: int) -> list[int]:
+    return pieces[move - 1]
+
+
 def move_domino_left(pieces: list[list[int]], move: int) -> bool:
-    player_domino_piece = pieces[move - 1]
-    if not validate_neighbour_domino(player_domino_piece, 0):
+    played_domino_piece = get_domino_piece(pieces, move)
+    if not validate_neighbour_domino(played_domino_piece, 0):
         return False
 
     snake_piece_first_number = snakes[0][0]
-    player_domino_piece_second_number = player_domino_piece[1]
+    player_domino_piece_second_number = played_domino_piece[1]
 
     if not swapped(player_domino_piece_second_number, snake_piece_first_number):
-        swap_domino_number_pair(player_domino_piece)
+        swap_domino_number_pair(played_domino_piece)
 
-    snakes.insert(0, player_domino_piece)
-    pieces.remove(player_domino_piece)
+    snakes.insert(0, played_domino_piece)
+    pieces.remove(played_domino_piece)
     return True
 
 
 def move_domino_right(pieces: list[list[int]], move: int) -> bool:
-    player_domino_piece = pieces[move - 1]
+    player_domino_piece = get_domino_piece(pieces, move)
     if not validate_neighbour_domino(player_domino_piece, -1):
         return False
 
@@ -145,7 +157,7 @@ def validate_neighbour_domino(snake_piece: list[int], index: int) -> bool:
     return neighbour_snake_pair_number in snake_piece
 
 
-def validate_input(move: str) -> bool:
+def validate_player_input(move: str) -> bool:
     if move.isalpha():
         return False
 
@@ -161,9 +173,10 @@ def validate_input(move: str) -> bool:
 
 
 def remove_stock_piece(pieces: list[list[int]]) -> None:
-    random_stock: list[int] = random.choice(stock_pieces)
-    pieces.append(random_stock)
-    stock_pieces.remove(random_stock)
+    if stock_pieces:
+        random_stock: list[int] = random.choice(stock_pieces)
+        pieces.append(random_stock)
+        stock_pieces.remove(random_stock)
 
 
 def print_stage() -> None:

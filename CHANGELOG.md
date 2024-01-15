@@ -21,3 +21,6 @@
 12 Jan 2024
 - Implemented a scoring based algorithm for taking the decision about what piece the computer needs to move and in what location, left or right, 
 and having it's decision validated before going forward with the move.
+
+15 Jan 2024
+- refactored into classes

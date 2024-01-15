@@ -2,11 +2,11 @@ import random
 
 import pytest
 
-from python_dominoes.dominoes import (
+from python_dominoes.domino import (
+    find_highest_domino,
     generate_dominoes,
     shuffle_dominoes,
     split_dominoes,
-    find_highest_domino,
 )
 
 

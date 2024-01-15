@@ -80,12 +80,53 @@ def player_move() -> None:
 
 
 def computer_move() -> None:
-    while True:
-        comp_options = range(-len(computer_pieces), len(computer_pieces) + 1)
-        move = random.choice(comp_options)
+    score_dict = calculate_domino_weight()
+    found = False
 
-        if move_domino(computer_pieces, move):
+    scores_list = sorted(score_dict.keys(), reverse=True)
+    for score in scores_list:
+        move = score_dict[score]
+
+        lef_and_right = (-move, move)
+        for move in lef_and_right:
+            if move_domino(computer_pieces, move):
+                found = True
+                break
+
+        if found:
             break
+
+    if not found:
+        move_domino(computer_pieces, 0)
+
+
+def get_number_frequency():
+    frequency_occurrence = {}
+
+    count_number_frequency(frequency_occurrence, computer_pieces)
+    count_number_frequency(frequency_occurrence, snakes)
+
+    return frequency_occurrence
+
+
+def count_number_frequency(
+    frequency_occurrence: dict, pieces: list[[list[int]]]
+) -> None:
+    for domino in range(7):
+        for domino_pair in pieces:
+            frequency_occurrence.setdefault(domino, 0)
+            frequency_occurrence[domino] += domino_pair.count(domino)
+
+
+def calculate_domino_weight() -> dict[int, int]:
+    frequency_occurrence = get_number_frequency()
+
+    total_score_idx = {}
+    for idx, domino_pair in enumerate(computer_pieces):
+        total = sum(frequency_occurrence[item] for item in domino_pair)
+        total_score_idx[total] = idx
+
+    return total_score_idx
 
 
 def move_domino(pieces: list[list[int]], move: int) -> bool:

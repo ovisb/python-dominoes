@@ -1,9 +1,9 @@
-from domino import Domino
+from domino_game import DominoGame
 from domino_handler import DominoHandler
 
 
 def ui():
-    domino_game = Domino()
+    domino_game = DominoGame()
     domino_handler = DominoHandler(domino_game)
 
     game_player = domino_game.initial_player_status

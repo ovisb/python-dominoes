@@ -19,8 +19,11 @@ class Domino:
     def __gt__(self, other_object: "Domino") -> bool:
         return self.piece > other_object.piece
 
+    def __eq__(self, other_object: "Domino") -> bool:
+        return self.piece == other_object.piece
+
     def __str__(self) -> str:
         return str(self.piece)
 
     def __repr__(self) -> str:
-        return f"Domino(first_number={self.__first_number}, second_number={self}"
+        return f"Domino(first_number={self.__first_number}, second_number={self.__second_number})"
